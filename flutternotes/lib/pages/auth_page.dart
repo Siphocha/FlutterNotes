@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../authLogic/auth_bloc.dart';
 import '../widgets/auth_forms.dart';
+import '../authLogic/auth_state.dart';
 
 class AuthPage extends StatelessWidget {
   const AuthPage({super.key});
