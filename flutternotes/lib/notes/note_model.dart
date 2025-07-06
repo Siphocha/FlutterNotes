@@ -4,8 +4,7 @@ import '../../notes/note_data.dart';
 
 class NoteModel extends Note {
   //Data of which the note model will hold.
-  NoteModel({String? id, required String text, required DateTime createdAt})
-    : super(id: id, text: text, createdAt: createdAt);
+  NoteModel({super.id, required super.text, required super.createdAt});
 
   factory NoteModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
