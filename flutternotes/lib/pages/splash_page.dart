@@ -8,7 +8,7 @@ class SplashPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Check auth status when splash screen loads
+    // Check auth status when splash screen loads.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<AuthBloc>().add(CheckAuthStatus());
     });
