@@ -16,76 +16,35 @@ import 'firebase_options.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  try {
-    // Initialize Firebase with debug logging
-    print('Initializing Firebase...');
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
+  // Initialize Firebase with debug logging
+  print('Initializing Firebase...');
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-    // Test Firebase services
-    await _testFirebaseConnection();
-
-    //The print statement is just for me to firebase connection
-    print('Firebase initialised: ${Firebase.apps.isNotEmpty}');
-
-    runApp(const MyApp());
-  } catch (e, stackTrace) {
-    // Error handling with your original print plus additional debugging
-    print('Firebase initialization failed: $e');
-    print('Stack trace: $stackTrace');
-
-    // Fallback UI
-    runApp(
-      MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.error, color: Colors.red, size: 50),
-                const SizedBox(height: 20),
-                const Text(
-                  'Initialization Error',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Text(
-                    'Failed to connect to Firebase:\n${e.toString()}',
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                ElevatedButton(
-                  onPressed: () => main(), // Restart app
-                  child: const Text('Retry'),
-                ),
-              ],
-            ),
+  runApp(const MyApp());
+  // Fallback UI
+  runApp(
+    MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error, color: Colors.red, size: 50),
+              const SizedBox(height: 20),
+              const Text(
+                'Initialization Error',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              ElevatedButton(
+                onPressed: () => main(), // Restart app
+                child: const Text('Retry'),
+              ),
+            ],
           ),
         ),
       ),
-    );
-  }
-}
-
-Future<void> _testFirebaseConnection() async {
-  try {
-    // Quick test of Firestore
-    await FirebaseFirestore.instance
-        .collection('connection_test')
-        .doc('test')
-        .set({'timestamp': DateTime.now()});
-
-    // Quick test of Auth
-    await FirebaseAuth.instance.signInAnonymously();
-    await FirebaseAuth.instance.signOut();
-
-    print('Firebase services test successful');
-  } catch (e) {
-    print('Firebase service test failed: $e');
-    throw Exception('Firebase services not working properly');
-  }
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
