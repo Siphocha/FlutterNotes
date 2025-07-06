@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc/bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'auth_event.dart';
@@ -22,16 +24,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     CheckAuthStatus event,
     Emitter<AuthState> emit,
   ) async {
-    emit(AuthState.loading());
     try {
+      // Skip loading state for initial check to speed up startup
       final user = _auth.currentUser;
       if (user != null) {
         emit(AuthState.authenticated(user.email ?? ''));
       } else {
-        emit(AuthState.unauthenticated());
+        emit(AuthState.unauthenticated()); // Immediately show auth screen
       }
     } catch (e) {
-      emit(AuthState.error(e.toString()));
+      emit(AuthState.error('Session check failed: ${e.toString()}'));
     }
   }
 
@@ -40,17 +42,22 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     SignUpRequested event,
     Emitter<AuthState> emit,
   ) async {
-    emit(AuthState.loading());
     try {
-      await _auth.createUserWithEmailAndPassword(
-        email: event.email,
-        password: event.password,
-      );
+      emit(AuthState.loading());
+      await _auth
+          .createUserWithEmailAndPassword(
+            email: event.email,
+            password: event.password,
+          )
+          .timeout(const Duration(seconds: 15)); // Add timeout
+
       emit(AuthState.authenticated(event.email));
     } on FirebaseAuthException catch (e) {
       emit(AuthState.error(e.message ?? 'Signing up failed'));
+    } on TimeoutException {
+      emit(AuthState.error('Connection timeout. Try again'));
     } catch (e) {
-      emit(AuthState.error(e.toString()));
+      emit(AuthState.error('Unexpected error: ${e.toString()}'));
     }
   }
 
@@ -59,17 +66,22 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     LoginRequested event,
     Emitter<AuthState> emit,
   ) async {
-    emit(AuthState.loading());
     try {
-      await _auth.signInWithEmailAndPassword(
-        email: event.email,
-        password: event.password,
-      );
+      emit(AuthState.loading());
+      await _auth
+          .signInWithEmailAndPassword(
+            email: event.email,
+            password: event.password,
+          )
+          .timeout(const Duration(seconds: 15)); // Add timeout
+
       emit(AuthState.authenticated(event.email));
     } on FirebaseAuthException catch (e) {
       emit(AuthState.error(e.message ?? 'Logging in failed'));
+    } on TimeoutException {
+      emit(AuthState.error('Connection timeout. Try again'));
     } catch (e) {
-      emit(AuthState.error(e.toString()));
+      emit(AuthState.error('Unexpected error: ${e.toString()}'));
     }
   }
 
@@ -78,12 +90,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     LogoutRequested event,
     Emitter<AuthState> emit,
   ) async {
-    emit(AuthState.loading());
     try {
+      emit(AuthState.loading());
       await _auth.signOut();
       emit(AuthState.unauthenticated());
     } catch (e) {
-      emit(AuthState.error(e.toString()));
+      emit(AuthState.error('Logout failed: ${e.toString()}'));
     }
   }
 }
